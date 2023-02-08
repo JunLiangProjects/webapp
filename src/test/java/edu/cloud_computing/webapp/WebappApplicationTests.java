@@ -1,10 +1,10 @@
-package com.assignment_1_local;
+package edu.cloud_computing.webapp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Assignment1LocalApplicationTests {
+class WebappApplicationTests {
 
     @Test
     void contextLoads() {

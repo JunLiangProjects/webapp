@@ -1,10 +1,10 @@
-package com.assignment_1_local.controller;
+package edu.cloud_computing.webapp.controller;
 
-import com.assignment_1_local.dao.UserDao;
-import com.assignment_1_local.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import edu.cloud_computing.webapp.dao.UserDao;
+import edu.cloud_computing.webapp.entity.User;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -45,7 +45,7 @@ public class UserController {
         }
         if (!username.matches("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your username has to be valid email address!'}");
-        } else if (!UserDao.checkUsernameAvailable(username)) {
+        } else if (UserDao.checkUsernameExists(username)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This username already occupied!'}");
         }
 
@@ -96,10 +96,11 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'you can not change your username'}");
             }
             if (user.getPassword() != null) {
-                oldUser.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
-            }
-            if (user.getPassword().equals("")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Password can not be empty!'}");
+                if (user.getPassword().equals("")) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Password can not be empty!'}");
+                } else {
+                    oldUser.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+                }
             }
             if (user.getFirstName() != null) {
                 oldUser.setFirstName(user.getFirstName());
@@ -148,15 +149,13 @@ public class UserController {
 
     public Boolean tokenAuthorized(String token) {//comparing input username & password match the record
         String[] userInfo = tokenDecode(token);
-        if (userInfo.length != 2 || userInfo[0] == null || userInfo[0].equals("")) {
+        if (userInfo.length != 2 || userInfo[0].equals("")) {
             return false;
         }
-        String password = userInfo[1];
-        User user = UserDao.getUserByUsername(tokenDecode(token)[0]);
-        if (user == null) {
+        if (!UserDao.checkUsernameExists(userInfo[0])) {
             return false;
         }
-        return BCrypt.checkpw(password, user.getPassword());
+        return BCrypt.checkpw(userInfo[1], UserDao.getUserByUsername(userInfo[0]).getPassword());
     }
 
     public String[] tokenDecode(String token) {//Convert token into username & password
