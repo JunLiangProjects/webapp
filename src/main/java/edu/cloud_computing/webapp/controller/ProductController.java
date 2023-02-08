@@ -71,7 +71,7 @@ public class ProductController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
-            if (product.getQuantity() < 0 || product.getQuantity() > 100) {
+            if (product.getQuantity() < 0 || product.getQuantity() > 100) {//What if quantity is not an int?
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only an integer quantity between 0 and 100 are allowed during input'}");
             }
             if (ProductDao.checkSkuExists(product.getSku())) {
@@ -90,7 +90,7 @@ public class ProductController {
             if (product.getManufacturer() != null) {
                 oldProduct.setManufacturer(product.getManufacturer());
             }
-//            if (product.getQuantity() != null) {
+//            if (product.getQuantity() != null) {//What if quantity is not an int?
 //                oldProduct.setManufacturer(product.getManufacturer());
 //            }
             ProductDao.updateProduct(oldProduct);
