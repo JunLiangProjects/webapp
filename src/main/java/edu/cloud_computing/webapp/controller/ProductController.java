@@ -59,9 +59,7 @@ public class ProductController {
 
 
     @PutMapping("/v1/product/{productId}")
-    @PatchMapping("/v1/product/{productId}")
-
-    public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
+    public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
@@ -70,16 +68,60 @@ public class ProductController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
-            if (product.getQuantity() < 0 || product.getQuantity() > 100) {//What if quantity is not an int?
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only an integer quantity between 0 and 100 are allowed during input'}");
-            }
-            if (ProductDao.checkSkuExists(product.getSku())) {
+            if (hasIllegalField(requestBody) || product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || product.getQuantity() < 0 || product.getQuantity() > 100) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update!'}");
+            }//What if quantity is not an int?
+            Product oldProduct = ProductDao.getProductById(productId);
+            if (!product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
             }
             if (isForbidden(requestHeader, productId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
+            product.setProductId(productId);
+            product.setDateAdded(oldProduct.getDateAdded());
+            product.setOwnerUserId(oldProduct.getOwnerUserId());
+            ProductDao.updateProduct(product);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/v1/product/{productId}")
+    public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
+        try {
+            if (!UserController.isAuthorized(requestHeader)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
+            }
+            HashSet<String> hashSet = new HashSet<>();//Here's just a modefied version of checking illegal field.
+            hashSet.add("name");
+            hashSet.add("description");
+            hashSet.add("sku");
+            hashSet.add("manufacturer");
+            hashSet.add("quantity");
+            Iterator<String> keys = new JSONObject(requestBody).keys();
+            boolean changingQuantity = false;//Checking whether we're changing quantity.
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (!hashSet.contains(key)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
+                }
+                if (key.equals("quantity")) {
+                    changingQuantity = true;
+                }
+            }
+            Product product = new ObjectMapper().readValue(requestBody, Product.class);
+            if (product.getQuantity() < 0 || product.getQuantity() > 100) {//What if quantity is not an int?
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only an integer quantity between 0 and 100 are allowed during input'}");
+            }
             Product oldProduct = ProductDao.getProductById(productId);
+            if (product.getSku() != null && !product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
+            }
+            if (isForbidden(requestHeader, productId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
+            }
             if (product.getName() != null) {
                 oldProduct.setName(product.getName());
             }
@@ -92,9 +134,9 @@ public class ProductController {
             if (product.getManufacturer() != null) {
                 oldProduct.setManufacturer(product.getManufacturer());
             }
-//            if (NumberUtils.(product.getQuantity())) {//What if quantity is not an int?
+            if (changingQuantity) {//What if quantity is not an int?
                 oldProduct.setQuantity(product.getQuantity());
-//            }
+            }
             ProductDao.updateProduct(oldProduct);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
         } catch (Exception e) {
