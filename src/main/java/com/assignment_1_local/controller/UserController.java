@@ -33,10 +33,12 @@ public class UserController {
     @PostMapping("/v1/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
+        if (hasIllegalField(requestBody)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
+        }
         User user = mapper.readValue(requestBody, User.class);
         String username = user.getUsername();
-
-        if (hasIlleglField(requestBody)) {
+        if (hasIllegalField(requestBody)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
         }
         if (user.getUsername() == null || user.getPassword() == null || user.getFirstName() == null || user.getLastName() == null) {
@@ -80,7 +82,7 @@ public class UserController {
     @PutMapping("/v1/user/{userId}")
     public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders header, @RequestBody String body, @PathVariable("userId") int userId) {
         try {
-            if (hasIlleglField(body)) {
+            if (hasIllegalField(body)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
             }
             if (!isAuthorized(header)) {
@@ -128,7 +130,7 @@ public class UserController {
         return false;
     }
 
-    public Boolean hasIlleglField(String body) {
+    public Boolean hasIllegalField(String body) {
         HashSet<String> hashSet = new HashSet<>();
         hashSet.add("username");
         hashSet.add("password");
@@ -161,7 +163,6 @@ public class UserController {
     public String[] tokenDecode(String token) {//Convert token into username & password
         String baseToken = token.substring("Basic".length() + 1);
         byte[] decode = Base64.getDecoder().decode(baseToken);
-        String[] credentials = new String(decode, StandardCharsets.UTF_8).split(":");
-        return credentials;
+        return new String(decode, StandardCharsets.UTF_8).split(":");
     }
 }
