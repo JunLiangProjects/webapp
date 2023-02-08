@@ -12,7 +12,7 @@
         <property name="connection.password">00000000</property>
 
         <!-- SQL dialect -->
-        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
         <!-- Mapping with model class containing annotations -->
         <property name="hbm2ddl.auto">update</property>

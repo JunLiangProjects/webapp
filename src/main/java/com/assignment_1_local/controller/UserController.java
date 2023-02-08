@@ -32,11 +32,12 @@ public class UserController {
 
     @PostMapping("/v1/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        User user = mapper.readValue(requestBody, User.class);
+        if (hasIllegalField(requestBody)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
+        }
+        User user = new ObjectMapper().readValue(requestBody, User.class);
         String username = user.getUsername();
-
-        if (hasIlleglField(requestBody)) {
+        if (hasIllegalField(requestBody)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
         }
         if (user.getUsername() == null || user.getPassword() == null || user.getFirstName() == null || user.getLastName() == null) {
@@ -59,12 +60,12 @@ public class UserController {
     }
 
     @GetMapping("/v1/user/{userId}")
-    public ResponseEntity<?> getUser(@RequestHeader HttpHeaders header, @PathVariable("userId") int userId) {
+    public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) {
         try {
-            if (!isAuthorized(header)) {
+            if (!isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
-            if (!isNotForbidden(header, userId)) {
+            if (!isNotForbidden(requestHeader, userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User user = UserDao.getUserById(userId);
@@ -78,15 +79,15 @@ public class UserController {
     }
 
     @PutMapping("/v1/user/{userId}")
-    public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders header, @RequestBody String body, @PathVariable("userId") int userId) {
+    public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) {
         try {
-            if (hasIlleglField(body)) {
+            if (hasIllegalField(body)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
             }
-            if (!isAuthorized(header)) {
+            if (!isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
-            if (!isNotForbidden(header, userId)) {
+            if (!isNotForbidden(requestHeader, userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User oldUser = UserDao.getUserById(userId);
@@ -113,22 +114,22 @@ public class UserController {
         }
     }
 
-    public Boolean isAuthorized(HttpHeaders header) {
-        if (header.containsKey("Authorization") && header.getFirst("Authorization") != null) {//Has authentication
-            return tokenAuthorized(header.getFirst("Authorization"));//username & password correct
+    public Boolean isAuthorized(HttpHeaders requestHeader) {
+        if (requestHeader.containsKey("Authorization") && requestHeader.getFirst("Authorization") != null) {//Has authentication
+            return tokenAuthorized(requestHeader.getFirst("Authorization"));//username & password correct
         }
         return false;
     }
 
-    public Boolean isNotForbidden(HttpHeaders header, int userId) {
+    public Boolean isNotForbidden(HttpHeaders requestHeader, int userId) {
         if (UserDao.checkIdExists(userId)) {//The user you are looking for should exist
             //userId match. You can't log in yourself to touch others'
-            return userId == UserDao.getUserByUsername(tokenDecode(header.getFirst("Authorization"))[0]).getUserId();
+            return userId == UserDao.getUserByUsername(tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
         }
         return false;
     }
 
-    public Boolean hasIlleglField(String body) {
+    public Boolean hasIllegalField(String body) {
         HashSet<String> hashSet = new HashSet<>();
         hashSet.add("username");
         hashSet.add("password");
@@ -161,7 +162,6 @@ public class UserController {
     public String[] tokenDecode(String token) {//Convert token into username & password
         String baseToken = token.substring("Basic".length() + 1);
         byte[] decode = Base64.getDecoder().decode(baseToken);
-        String[] credentials = new String(decode, StandardCharsets.UTF_8).split(":");
-        return credentials;
+        return new String(decode, StandardCharsets.UTF_8).split(":");
     }
 }
