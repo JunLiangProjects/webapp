@@ -17,5 +17,6 @@
         <!-- Mapping with model class containing annotations -->
         <property name="hbm2ddl.auto">update</property>
         <mapping class="edu.cloud_computing.webapp.entity.User"/>
+        <mapping class="edu.cloud_computing.webapp.entity.Product"/>
     </session-factory>
 </hibernate-configuration>

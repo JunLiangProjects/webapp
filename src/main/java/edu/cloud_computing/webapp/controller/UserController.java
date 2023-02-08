@@ -62,7 +62,7 @@ public class UserController {
             if (!isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
-            if (!isNotForbidden(requestHeader, userId)) {
+            if (isForbidden(requestHeader, userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User user = UserDao.getUserById(userId);
@@ -84,7 +84,7 @@ public class UserController {
             if (!isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
-            if (!isNotForbidden(requestHeader, userId)) {
+            if (isForbidden(requestHeader, userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User oldUser = UserDao.getUserById(userId);
@@ -119,10 +119,10 @@ public class UserController {
         return false;
     }
 
-    public Boolean isNotForbidden(HttpHeaders requestHeader, int userId) {
+    public Boolean isForbidden(HttpHeaders requestHeader, int userId) {
         if (UserDao.checkIdExists(userId)) {//The user you are looking for should exist
             //userId match. You can't log in yourself to touch others'
-            return userId == UserDao.getUserByUsername(tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
+            return userId != UserDao.getUserByUsername(tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
         }
         return false;
     }

@@ -57,7 +57,7 @@ public class ProductDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
-        return result == 0;
+        return result != 0;
     }
 
     public static boolean checkIdExists(int id) {

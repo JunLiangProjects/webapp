@@ -57,15 +57,14 @@ public class ProductController {
         }
     }
 
+
     @PutMapping("/v1/product/{productId}")
     @PatchMapping("/v1/product/{productId}")
+
     public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
-            }
-            if (!isNotForbidden(requestHeader, productId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             if (hasIllegalField(requestBody)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
@@ -76,6 +75,9 @@ public class ProductController {
             }
             if (ProductDao.checkSkuExists(product.getSku())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
+            }
+            if (isForbidden(requestHeader, productId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             Product oldProduct = ProductDao.getProductById(productId);
             if (product.getName() != null) {
@@ -90,8 +92,8 @@ public class ProductController {
             if (product.getManufacturer() != null) {
                 oldProduct.setManufacturer(product.getManufacturer());
             }
-//            if (product.getQuantity() != null) {//What if quantity is not an int?
-//                oldProduct.setManufacturer(product.getManufacturer());
+//            if (NumberUtils.(product.getQuantity())) {//What if quantity is not an int?
+                oldProduct.setQuantity(product.getQuantity());
 //            }
             ProductDao.updateProduct(oldProduct);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
@@ -100,7 +102,7 @@ public class ProductController {
         }
     }
 
-    @PutMapping("/v1/product/{productId}")
+    @DeleteMapping("/v1/product/{productId}")
     public ResponseEntity<?> deleteProduct(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) {
         try {
             if (!UserController.isAuthorized(requestHeader)) {
@@ -141,11 +143,11 @@ public class ProductController {
         return false;
     }
 
-    public Boolean isNotForbidden(HttpHeaders requestHeader, int productId) {
+    public Boolean isForbidden(HttpHeaders requestHeader, int productId) {
         if (ProductDao.checkIdExists(productId)) {//The user you are looking for should exist
             //userId match. You can't log in yourself to touch others'
-            return productId == UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
+            return ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
         }
-        return false;
+        return true;
     }
 }
