@@ -116,7 +116,7 @@ public class UserController {
             //userId match. You can't log in yourself to touch others'
             return userId != UserDao.getUserByUsername(tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
         }
-        return false;
+        return true;
     }
 
     public Boolean hasIllegalField(String body) {
