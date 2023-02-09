@@ -12,10 +12,11 @@
         <property name="connection.password">00000000</property>
 
         <!-- SQL dialect -->
-        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
         <!-- Mapping with model class containing annotations -->
         <property name="hbm2ddl.auto">update</property>
-        <mapping class="com.assignment_1_local.entity.User"/>
+        <mapping class="edu.cloud_computing.webapp.entity.User"/>
+        <mapping class="edu.cloud_computing.webapp.entity.Product"/>
     </session-factory>
 </hibernate-configuration>

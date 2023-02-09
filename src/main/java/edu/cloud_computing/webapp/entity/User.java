@@ -1,4 +1,4 @@
-package com.assignment_1_local.entity;
+package edu.cloud_computing.webapp.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -6,10 +6,10 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "assignment_1")
+@Table(name = "user")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
 //    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int userId;
     private String username;

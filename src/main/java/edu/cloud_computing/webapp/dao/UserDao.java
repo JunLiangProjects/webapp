@@ -1,6 +1,6 @@
-package com.assignment_1_local.dao;
+package edu.cloud_computing.webapp.dao;
 
-import com.assignment_1_local.entity.User;
+import edu.cloud_computing.webapp.entity.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -52,7 +52,7 @@ public class UserDao {
         return list.get(0);
     }
 
-    public static boolean checkUsernameAvailable(String username) {
+    public static boolean checkUsernameExists(String username) {
         Configuration cfg = new Configuration();
         SessionFactory sf = cfg.configure("hibernate.cfg.xml").buildSessionFactory();
         Session session = sf.openSession();
@@ -62,7 +62,7 @@ public class UserDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
-        return result == 0;
+        return result != 0;
     }
 
     public static boolean checkIdExists(int userId) {

@@ -1,4 +1,4 @@
-## What's this
+## What's this in here?
 
 A user organizing system including user creating, updating and checking functions. 
 
