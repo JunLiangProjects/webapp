@@ -21,14 +21,6 @@ import java.util.Iterator;
 
 @RestController
 public class UserController {
-    @GetMapping("/healthz")
-    public ResponseEntity<?> HealthEndpoint() {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
 
     @PostMapping("/v1/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {

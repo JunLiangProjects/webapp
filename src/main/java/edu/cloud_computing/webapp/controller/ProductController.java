@@ -57,7 +57,6 @@ public class ProductController {
         }
     }
 
-
     @PutMapping("/v1/product/{productId}")
     public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
@@ -168,6 +167,14 @@ public class ProductController {
         }
     }
 
+    public Boolean isForbidden(HttpHeaders requestHeader, int productId) {
+        if (ProductDao.checkIdExists(productId)) {//The user you are looking for should exist
+            //userId match. You can't log in yourself to touch others'
+            return ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
+        }
+        return true;
+    }
+
     public Boolean hasIllegalField(String body) {
         HashSet<String> hashSet = new HashSet<>();
         hashSet.add("name");
@@ -183,13 +190,5 @@ public class ProductController {
             }
         }
         return false;
-    }
-
-    public Boolean isForbidden(HttpHeaders requestHeader, int productId) {
-        if (ProductDao.checkIdExists(productId)) {//The user you are looking for should exist
-            //userId match. You can't log in yourself to touch others'
-            return ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
-        }
-        return true;
     }
 }
