@@ -37,12 +37,12 @@ class WebappApplicationTests {
 //
 //        restTemplate.get
 //
-//        URL url = new URL("http://localhost:8080/healthz");
-//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//        connection.setRequestMethod("GET");
-//        connection.connect();
-//        int status = connection.getResponseCode();
-//        connection.disconnect();
-//        Assertions.assertEquals(200, status);
+        URL url = new URL("http://localhost:8080/healthz");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+        int status = connection.getResponseCode();
+        connection.disconnect();
+        Assertions.assertEquals(200, status);
     }
 }
