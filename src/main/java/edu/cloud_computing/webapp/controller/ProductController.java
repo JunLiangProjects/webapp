@@ -48,7 +48,7 @@ public class ProductController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'No product with this id exists.'}");
             }
             Product product = ProductDao.getProductById(productId);
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             ObjectWriter ow = new ObjectMapper().setDateFormat(df).writer().withDefaultPrettyPrinter();
             String jsonStr = ow.writeValueAsString(product);
             return ResponseEntity.status(HttpStatus.OK).body(jsonStr);
@@ -93,7 +93,7 @@ public class ProductController {
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
-            HashSet<String> hashSet = new HashSet<>();//Here's just a modefied version of checking illegal field.
+            HashSet<String> hashSet = new HashSet<>();//Here's just a modified version of checking illegal field.
             hashSet.add("name");
             hashSet.add("description");
             hashSet.add("sku");
@@ -111,7 +111,7 @@ public class ProductController {
                 }
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
-            if (product.getQuantity() < 0 || product.getQuantity() > 100) {//What if quantity is not an int?
+            if (changingQuantity && (product.getQuantity() < 0 || product.getQuantity() > 100)) {//What if quantity is not an int?
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only an integer quantity between 0 and 100 are allowed during input'}");
             }
             Product oldProduct = ProductDao.getProductById(productId);
