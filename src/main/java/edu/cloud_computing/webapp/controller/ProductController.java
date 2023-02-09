@@ -26,7 +26,24 @@ public class ProductController {
         }
         ObjectMapper mapper = new ObjectMapper();
         Product product = mapper.readValue(requestBody, Product.class);
-        if (hasIllegalField(requestBody) || product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || product.getQuantity() < 0 || product.getQuantity() > 100) {
+        HashSet<String> hashSet = new HashSet<>();//Here's just a modified version of checking illegal field.
+        hashSet.add("name");
+        hashSet.add("description");
+        hashSet.add("sku");
+        hashSet.add("manufacturer");
+        hashSet.add("quantity");
+        Iterator<String> keys = new JSONObject(requestBody).keys();
+        boolean hasQuantity = false;//Checking whether we're changing quantity.
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (!hashSet.contains(key)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
+            }
+            if (key.equals("quantity")) {
+                hasQuantity = true;
+            }
+        }
+        if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity || product.getQuantity() < 0 || product.getQuantity() > 100) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create!'}");
         }//What if quantity is not an int?
         if (ProductDao.checkSkuExists(product.getSku())) {
