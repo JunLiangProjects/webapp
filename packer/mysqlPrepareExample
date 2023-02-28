@@ -1,0 +1,22 @@
+sudo amazon-linux-extras install -y java-openjdk11
+
+# install mysql
+sudo amazon-linux-extras install epel -y
+sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm -y
+sudo yum install mysql-community-server -y
+
+# start mysql automatically
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+
+# reset the password
+
+MYSQL_TEMP_PASSWORD=$(sudo grep 'temporary password' /var/log/mysqld.log | awk '{print$NF}')
+NEW_PASSWORD='19980605Jhw234.'
+sudo tee /root/.my.cnf <<EOF
+[client]
+user=root
+password="$MYSQL_TEMP_PASSWORD"
+EOF
+sudo mysql --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$NEW_PASSWORD';FLUSH PRIVILEGES;"
+sudo mysql --user=root --password="$NEW_PASSWORD" -e "CREATE DATABASE cloudApp;"

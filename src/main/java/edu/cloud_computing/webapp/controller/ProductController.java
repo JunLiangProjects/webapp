@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactoryLoader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
