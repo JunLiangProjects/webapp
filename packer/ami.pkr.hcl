@@ -24,7 +24,7 @@ variable "shared_account_id" {
 }
 
 # Configure the builder
-source "amazon-ebs" "my_ami" {
+#source "amazon-ebs" "my_ami" {
   profile         = "${var.profile}"
   region          = "${var.aws_region}"
   ami_regions     = ["us-east-1"]
