@@ -1,0 +1,35 @@
+{
+  "title": "user",
+  "description": "Use this schema when not all required properties are required in input",
+  "type": "module",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "account_created": {
+      "type": "string"
+    },
+    "account_updated": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "sku",
+    "manufacturer",
+    "quantity"
+  ]
+}

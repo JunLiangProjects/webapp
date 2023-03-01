@@ -1,0 +1,36 @@
+{
+  "title": "partial product",
+  "description": "Use this schema when not all required properties are required in input",
+  "type": "module",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "date_added": {
+      "type": "string"
+    },
+    "date_last_updated": {
+      "type": "string"
+    },
+    "owner_user_id": {
+      "type": "integer"
+    }
+  }
+}
