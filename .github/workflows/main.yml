@@ -35,7 +35,7 @@ jobs:
 #          mysql password: 'Me_262A1a' # Required if "mysql user" exists. The password for the "mysql user"
 
       - name: Build with Maven and Build a jar package
-        run: mvn -B package --file webapp/pom.xml
+        run: mvn -B package --file pom.xml
 
 #      - name: Find Jar
 #        run: find . -name '*.jar' -type f
