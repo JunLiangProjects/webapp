@@ -2,22 +2,68 @@ name: Java CI with Maven
 
 on:
   pull_request:
-    branches: 
-    - main
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-      
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      #            cache: maven
+
+      - name: Shut down Ubuntu Mysql
+        run: sudo service mysql stop
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+          collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+          mysql version: '8.0.31' # Optional, default value is "latest". The version of the MySQL
+          mysql database: 'CSYE6225' # Optional, default value is "test". The specified database which will be create
+          mysql root password: 'Me_262A1a' # Required if "mysql user" is empty, default is empty. The root superuser password
+          mysql user: 'Jun_Liang' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+          mysql password: 'Me_262A1a' # Required if "mysql user" exists. The password for the "mysql user"
+
+      - name: Build with Maven and Build a jar package
+        run: mvn -B package --file webapp/pom.xml
+
+      - name: Find Jar
+        run: find . -name '*.jar' -type f
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: webapp-0.0.1-SNAPSHOT
+          path: ./webapp/target/webapp-0.0.1-SNAPSHOT.jar
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install Packer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y packer
+
+      - name: Find Shell
+        run: find . -name '*.sh' -type f
+
+      - name: Build AMI
+        run: |
+          packer init ./packer
+          packer fmt ./packer
+          packer validate ./packer
+          packer build ./packer
