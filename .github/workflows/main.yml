@@ -20,31 +20,31 @@ jobs:
           distribution: 'temurin'
       #            cache: maven
 
-      - name: Shut down Ubuntu Mysql
-        run: sudo service mysql stop
+#      - name: Shut down Ubuntu Mysql
+#        run: sudo service mysql stop
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
-          collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
-          mysql version: '8.0.31' # Optional, default value is "latest". The version of the MySQL
-          mysql database: 'CSYE6225' # Optional, default value is "test". The specified database which will be create
-          mysql root password: 'Me_262A1a' # Required if "mysql user" is empty, default is empty. The root superuser password
-          mysql user: 'Jun_Liang' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
-          mysql password: 'Me_262A1a' # Required if "mysql user" exists. The password for the "mysql user"
+#      - name: Setup MySQL
+#        uses: mirromutth/mysql-action@v1.1
+#        with:
+#          character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+#          collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+#          mysql version: '8.0.31' # Optional, default value is "latest". The version of the MySQL
+#          mysql database: 'CSYE6225' # Optional, default value is "test". The specified database which will be create
+#          mysql root password: 'Me_262A1a' # Required if "mysql user" is empty, default is empty. The root superuser password
+#          mysql user: 'Jun_Liang' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+#          mysql password: 'Me_262A1a' # Required if "mysql user" exists. The password for the "mysql user"
 
       - name: Build with Maven and Build a jar package
         run: mvn -B package --file webapp/pom.xml
 
-      - name: Find Jar
-        run: find . -name '*.jar' -type f
+#      - name: Find Jar
+#        run: find . -name '*.jar' -type f
 
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: webapp-0.0.1-SNAPSHOT
-          path: ./webapp/target/webapp-0.0.1-SNAPSHOT.jar
+#      - name: Upload JAR artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: webapp-0.0.1-SNAPSHOT
+#          path: ./webapp/target/webapp-0.0.1-SNAPSHOT.jar
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
