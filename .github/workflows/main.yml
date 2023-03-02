@@ -39,13 +39,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y packer
 
-#      - name: Find Shell
-#        id: find
-#        run: find . -name '*.pkr.hcl' -type f
+      - name: Find Shell
+        id: find
+        run: find . -name '*.pkr.hcl' -type f
 
       - name: Build AMI
         run: |
-          packer init ../../../packer
-          packer fmt ../../../packer
-          packer validate ../../../packer
-          packer build ../../../packer
+          packer init packer
+          packer fmt packer
+          packer validate packer
+          packer build packer
+
+#          packer init /packer
+#          packer fmt /packer
+#          packer validate /packer
+#          packer build /packer
+
+#          packer init ./packer
+#          packer fmt ./packer
+#          packer validate ./packer
+#          packer build ./packer
+
+#          packer init ../../../packer
+#          packer fmt ../../../packer
+#          packer validate ../../../packer
+#          packer build ../../../packer
