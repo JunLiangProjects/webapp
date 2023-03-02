@@ -64,11 +64,11 @@ jobs:
           sudo apt-get install -y packer
 
       - name: Find Shell
-        run: find . -name '*.hcl' -type f
+        run: find . -name '*.pkr.hcl' -type f
 
       - name: Build AMI
         run: |
-          packer init .
-          packer fmt .
-          packer validate .
-          packer build .
+          packer init ./
+          packer fmt ./
+          packer validate ./
+          packer build ./
