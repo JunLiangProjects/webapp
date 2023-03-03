@@ -28,7 +28,7 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: debug
-        run: apt-get update && apt-get install tree && pwd && ls -al && ls -al target && tree && exit 1
+        run: sudo apt-get update && sudo apt-get install tree -y && pwd && ls -al && ls -al target && tree && exit 1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
