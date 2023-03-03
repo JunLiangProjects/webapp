@@ -48,7 +48,7 @@ source "amazon-ebs" "my_ami" {
 build {
   sources = ["source.amazon-ebs.my_ami"]
   provisioner "shell" {
-    script = "beforeUpload.sh"
+    script = "packer/beforeUpload.sh"
   }
   provisioner "file" {
     source      = "target/webapp-0.0.1-SNAPSHOT.jar"
@@ -59,6 +59,6 @@ build {
     destination = "/etc/systemd/system/packerSystemd.service"
   }
   provisioner "shell" {
-    script = "afterUpload.sh"
+    script = "packer/afterUpload.sh"
   }
 }
