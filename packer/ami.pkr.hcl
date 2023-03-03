@@ -51,11 +51,11 @@ build {
     script = "beforeUpload.sh"
   }
   provisioner "file" {
-    source      = "../target/webapp-0.0.1-SNAPSHOT.jar"
+    source      = "target/webapp-0.0.1-SNAPSHOT.jar"
     destination = "/home/ec2-user/webapp-0.0.1-SNAPSHOT.jar"
   }
   provisioner "file" {
-    source      = "packerSystemd.service"
+    source      = "packer/packerSystemd.service"
     destination = "/etc/systemd/system/packerSystemd.service"
   }
   provisioner "shell" {
