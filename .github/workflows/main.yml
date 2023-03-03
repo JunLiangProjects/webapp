@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main
-      -
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -27,8 +26,8 @@ jobs:
       - name: Build with Maven and Build a jar package
         run: mvn -B package --file pom.xml
 
-      - name: debug
-        run: sudo apt-get update && sudo apt-get install tree -y && pwd && ls -al && ls -al target && tree && exit 1
+      #- name: debug
+       # run: sudo apt-get update && sudo apt-get install tree -y && pwd && ls -al && ls -al target && tree && exit 1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
