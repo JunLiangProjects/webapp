@@ -46,10 +46,10 @@ public class ProductController {
             }
         }
         if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity || product.getQuantity() < 0 || product.getQuantity() > 100) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create!'}");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create. '}");
         }//What if quantity is not an int?
         if (ProductDao.checkSkuExists(product.getSku())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
         }
         product.setOwnerUserId(UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId());
         ProductDao.createProduct(product);
@@ -93,7 +93,7 @@ public class ProductController {
             while (keys.hasNext()) {
                 String key = keys.next();
                 if (!hashSet.contains(key)) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input. '}");
                 }
                 if (key.equals("quantity")) {
                     hasQuantity = true;
@@ -104,11 +104,11 @@ public class ProductController {
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
             if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity||product.getQuantity() < 0 || product.getQuantity() > 100) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update!'}");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update. '}");
             }//What if quantity is not an int?
             Product oldProduct = ProductDao.getProductById(productId);
             if (!product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
             }
             if (isForbidden(requestHeader, productId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
@@ -152,7 +152,7 @@ public class ProductController {
             }
             Product oldProduct = ProductDao.getProductById(productId);
             if (product.getSku() != null && !product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied!'}");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
             }
             if (isForbidden(requestHeader, productId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");

@@ -51,18 +51,3 @@ jobs:
           packer fmt packer
           packer validate packer
           packer build packer
-
-#          packer init /packer
-#          packer fmt /packer
-#          packer validate /packer
-#          packer build /packer
-
-#          packer init ./packer
-#          packer fmt ./packer
-#          packer validate ./packer
-#          packer build ./packer
-
-#          packer init ../../../packer
-#          packer fmt ../../../packer
-#          packer validate ../../../packer
-#          packer build ../../../packer

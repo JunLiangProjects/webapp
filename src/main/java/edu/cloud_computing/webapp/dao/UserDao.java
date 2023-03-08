@@ -26,13 +26,13 @@ public class UserDao {
         session.close();
     }
 
-    public static User getUserById(int id) {
+    public static User getUserById(int userId) {
         Configuration cfg = new Configuration();
         SessionFactory sf = cfg.configure("hibernate.cfg.xml").buildSessionFactory();
         Session session = sf.openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("from User where id = :id");
-        query.setParameter("id", id);
+        Query query = session.createQuery("from User where userId = :userId");
+        query.setParameter("userId", userId);
         List<User> list = query.list();
         tx.commit();
         session.close();
