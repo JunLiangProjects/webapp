@@ -10,6 +10,9 @@
         <property name="connection.url">jdbc:mysql://localhost:3306/cloud_computing</property>
         <property name="connection.username">Jun_Liang</property>
         <property name="connection.password">Me_262A1a</property>
+<!--        <property name="connection.url">${url}</property>-->
+<!--        <property name="connection.username">${userName}</property>-->
+<!--        <property name="connection.password">${password}</property>-->
 
         <!-- SQL dialect -->
         <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
@@ -18,6 +21,6 @@
         <property name="hbm2ddl.auto">update</property>
         <mapping class="edu.cloud_computing.webapp.entity.User"/>
         <mapping class="edu.cloud_computing.webapp.entity.Product"/>
-        <mapping class="edu.cloud_computing.webapp.entity.Image"/>
+<!--        <mapping class="edu.cloud_computing.webapp.entity.Image"/>-->
     </session-factory>
 </hibernate-configuration>

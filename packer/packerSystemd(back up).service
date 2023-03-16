@@ -1,0 +1,11 @@
+[Unit]
+Description=Packer custom AMI builder
+
+[Service]
+User=ec2-user
+ExecStart=/usr/bin/java -D??? -jar /home/ec2-user/webapp-0.0.1-SNAPSHOT.jar//填-D变量
+
+[Install]
+WantedBy=multi-user.target
+//文件放到terraform
+//也可以尝试 environment file
