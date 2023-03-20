@@ -118,7 +118,6 @@ public class ImageController {
         }
         Image image = ImageDao.getImageByImageId(imageId);
         //delete from bucket
-        ImageDao.deleteImage(image);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 

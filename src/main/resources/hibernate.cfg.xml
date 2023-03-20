@@ -21,6 +21,6 @@
         <property name="hbm2ddl.auto">update</property>
         <mapping class="edu.cloud_computing.webapp.entity.User"/>
         <mapping class="edu.cloud_computing.webapp.entity.Product"/>
-<!--        <mapping class="edu.cloud_computing.webapp.entity.Image"/>-->
+        <mapping class="edu.cloud_computing.webapp.entity.Image"/>
     </session-factory>
 </hibernate-configuration>
