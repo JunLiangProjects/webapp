@@ -32,7 +32,7 @@ public class ImageController {
         if (!UserController.isAuthorized(requestHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
-        if (file.getOriginalFilename() == null) {
+        if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Invalid file name.'}");
         }
         if (!ProductDao.checkIdExists(productId)) {
@@ -103,7 +103,7 @@ public class ImageController {
     }
 
     @DeleteMapping("/v1/product/{productId}/image/{imageId}")
-    public ResponseEntity<?> deleteImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) throws JsonProcessingException {
+    public ResponseEntity<?> deleteImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) {
         if (!UserController.isAuthorized(requestHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
