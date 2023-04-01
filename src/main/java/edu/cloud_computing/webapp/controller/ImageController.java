@@ -8,27 +8,44 @@ import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.Image;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 public class ImageController {
-//    @Autowired
+    //    @Autowired
 //    S3Client s3client;
-//    public static S3Client s3Client = S3Client.builder().credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
+
+    private static final Region region = Region.US_EAST_1;
+    private static final AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAQJ4SCHKIRFDX3CVD", "0Y3JLytg7BXvsv4x5hK4ZlfyMJtpQu9G7lkoNYFY");//改成IAM role验证方式
+    private static final S3Client s3Client = S3Client.builder().region(region).credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
+    //    private static S3Client s3Client = S3Client.builder().region(region).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
+
+    @Autowired
+    private ResourceLoader resourceLoader;
+    private final String bucketName = "terraform-20230401214827217000000002";
 
     @PostMapping("/v1/product/{productId}/image")
-    public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws JsonProcessingException {
+    public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
         if (!UserController.isAuthorized(requestHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
@@ -46,13 +63,22 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only jpg, jpeg and png allowed.'}");
         }
         String uuidFileName = UUID.randomUUID() + suffix;
+        String filePath = resourceLoader.getResource("").getFile().getPath() + "/" + uuidFileName;
+        System.out.println(filePath);
+        file.transferTo(new File(filePath));
         Image image = new Image();
         image.setProductId(productId);
-        image.setFileName(file.getOriginalFilename());
+        image.setFileName(uuidFileName);
         //Save to bucket
-        image.setS3BucketPath("default path");
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(uuidFileName).build();
+        s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromFile(new File(filePath)));
+        GetUrlRequest urlRequest = GetUrlRequest.builder().bucket(bucketName).key(uuidFileName).build();
+        String bucketPath = s3Client.utilities().getUrl(urlRequest).toExternalForm();
+        //Bucket operation done
+        image.setS3BucketPath(bucketPath);
         ImageDao.createImage(image);
-        image = ImageDao.getImageByFileNameAndProductId(file.getOriginalFilename(), productId);
+        image = ImageDao.getImageByFileNameAndProductId(uuidFileName, productId);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
         ObjectWriter objectWriter = new ObjectMapper().setDateFormat(dateFormat).writer().withDefaultPrettyPrinter();
         String jsonString = objectWriter.writeValueAsString(image);
@@ -118,46 +144,12 @@ public class ImageController {
         }
         Image image = ImageDao.getImageByImageId(imageId);
         //delete from bucket
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucketName).key(image.getFileName()).build();
+        s3Client.deleteObject(deleteObjectRequest);
+        //Bucket operation done
         ImageDao.deleteImage(image);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
-
-//    @Value("${aws.s3.bucket-name}")
-//    private String bucketName;
-//
-//    //调用withCredentials()方法将一个InstanceProfileCredentialsProvider对象传递给AmazonS3ClientBuilder对象。
-//    //InstanceProfileCredentialsProvider从Amazon EC2实例元数据服务中获取IAM角色的凭证
-//
-//
-//    @PostMapping(value = "/product/{product_id}/image")
-//    public Object uploadProductImage(@PathVariable("product_id") Long productId,
-//                                     @RequestParam("file") MultipartFile file) throws IOException {
-//        SecurityContext context = SecurityContextHolder.getContext();
-//        Authentication authentication = context.getAuthentication();
-//        Object principal = authentication.getPrincipal();
-//        String userName = ((UserDetails) principal).getUsername();
-//        long id = userService.getId(userName);
-//        if (id != productService.findOwnerId(productId)) {
-//            return new ExceptionMessage().fail();
-//        }
-//        // Get file extension
-//        String extension = getFileExtension(file);
-//        // Generate unique file name
-//        String fileName = UUID.randomUUID().toString() + "." + extension;
-//        // Create file in temporary directory
-//        File tempFile = Files.createTempFile(fileName, extension).toFile();
-//        file.transferTo(tempFile);
-//        // Upload file to S3 bucket
-//        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, productId + "/" + fileName, tempFile)
-//                .withCannedAcl(CannedAccessControlList.PublicRead);
-//        s3client.putObject(putObjectRequest);
-//        // Delete temporary file
-//        tempFile.delete();
-//        // Generate URL for uploaded file
-//        String fileUrl = s3client.getUrl(bucketName, productId + "/" + fileName).toExternalForm();
-//        // store the image information in RDS
-//        Image image = new Image(productId, fileName, fileUrl);
-//        imageDao.save(image);
-//        return ResponseEntity.status(HttpStatus.OK).body(image);
-//    }
 }
+
+//原因是这个地方的log_stream_name只能是cloudwatch_log_stream

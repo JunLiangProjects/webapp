@@ -56,7 +56,7 @@ public class ImageDao {
         List<Image> list = query.list();
         tx.commit();
         session.close();
-        return list.get(0);
+        return list.get(list.size() - 1);
     }
 
     public static Image getImageByBucketPath(String s3BucketPath) {
