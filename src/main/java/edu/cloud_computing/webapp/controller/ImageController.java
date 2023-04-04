@@ -24,6 +24,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -31,6 +33,25 @@ import java.util.UUID;
 
 @RestController
 public class ImageController {
+    @GetMapping("/health")
+    public ResponseEntity<?> AnotherHealthEndpoint() {
+        try {
+//            File file=new File();
+//            String fileName = "D:\\data\\test\\newFile3.txt";
+
+            // 转换成List<String>, 要注意java.lang.OutOfMemoryError: Java heap space
+            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
+//            List<String> lines = Files.readAllLines(Paths.get("D:\\Prototypes\\Java\\Cloud_Computing\\webapp\\src\\main\\resources\\ReadingTest.txt"));
+//            lines.forEach(System.out::println);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String str : lines) {
+                stringBuilder.append(str);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(stringBuilder.toString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
     //    @Autowired
 //    S3Client s3client;
 
