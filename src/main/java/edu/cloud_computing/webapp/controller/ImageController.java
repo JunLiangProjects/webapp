@@ -33,6 +33,8 @@ import java.util.UUID;
 
 @RestController
 public class ImageController {
+    private String bucketName;// = "terraform-20230401214827217000000002";
+
     @GetMapping("/health")
     public ResponseEntity<?> AnotherHealthEndpoint() {
         try {
@@ -47,7 +49,8 @@ public class ImageController {
             for (String str : lines) {
                 stringBuilder.append(str);
             }
-            return ResponseEntity.status(HttpStatus.OK).body(stringBuilder.toString());
+            bucketName = stringBuilder.toString();
+            return ResponseEntity.status(HttpStatus.OK).body(bucketName);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -62,7 +65,7 @@ public class ImageController {
 
     @Autowired
     private ResourceLoader resourceLoader;
-    private final String bucketName = "terraform-20230401214827217000000002";
+
 
     @PostMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
