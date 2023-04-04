@@ -15,18 +15,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +69,6 @@ public class ImageController {
         image.setProductId(productId);
         image.setFileName(uuidFileName);
         //Save to bucket
-
         PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(uuidFileName).build();
         s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromFile(new File(filePath)));
         GetUrlRequest urlRequest = GetUrlRequest.builder().bucket(bucketName).key(uuidFileName).build();
