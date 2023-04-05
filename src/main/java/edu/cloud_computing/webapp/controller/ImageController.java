@@ -8,6 +8,7 @@ import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.Image;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,7 @@ import java.util.UUID;
 
 @RestController
 public class ImageController {
+    @Value("${bucketName}")
     private String bucketName;// = "terraform-20230401214827217000000002";
 
     @GetMapping("/health")
@@ -42,14 +44,14 @@ public class ImageController {
 //            String fileName = "D:\\data\\test\\newFile3.txt";
 
             // 转换成List<String>, 要注意java.lang.OutOfMemoryError: Java heap space
-            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
-//            List<String> lines = Files.readAllLines(Paths.get("D:\\Prototypes\\Java\\Cloud_Computing\\webapp\\src\\main\\resources\\ReadingTest.txt"));
-//            lines.forEach(System.out::println);
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String str : lines) {
-                stringBuilder.append(str);
-            }
-            bucketName = stringBuilder.toString();
+//            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
+////            List<String> lines = Files.readAllLines(Paths.get("D:\\Prototypes\\Java\\Cloud_Computing\\webapp\\src\\main\\resources\\ReadingTest.txt"));
+////            lines.forEach(System.out::println);
+//            StringBuilder stringBuilder = new StringBuilder();
+//            for (String str : lines) {
+//                stringBuilder.append(str);
+//            }
+//            bucketName = stringBuilder.toString();
             return ResponseEntity.status(HttpStatus.OK).body(bucketName);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
