@@ -32,3 +32,5 @@ sudo yum install -y java-17-amazon-corretto.x86_64 -y
 
 # Grant permission for uploading
 sudo chmod 777 /etc/systemd/system/
+sudo mkdir /tmp/webapp
+sudo touch /tmp/webapp/application.properties
