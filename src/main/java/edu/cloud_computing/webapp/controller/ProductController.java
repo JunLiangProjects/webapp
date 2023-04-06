@@ -3,8 +3,10 @@ package edu.cloud_computing.webapp.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import edu.cloud_computing.webapp.dao.ImageDao;
 import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
+import edu.cloud_computing.webapp.entity.Image;
 import edu.cloud_computing.webapp.entity.Product;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 @RestController
 public class ProductController {
@@ -103,7 +106,7 @@ public class ProductController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'No product with this id exists.'}");
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
-            if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity||product.getQuantity() < 0 || product.getQuantity() > 100) {
+            if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity || product.getQuantity() < 0 || product.getQuantity() > 100) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update. '}");
             }//What if quantity is not an int?
             Product oldProduct = ProductDao.getProductById(productId);
@@ -195,6 +198,10 @@ public class ProductController {
             Product product = ProductDao.getProductById(productId);
             if (userId != product.getOwnerUserId()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
+            }
+            List<Image> imageList = ImageDao.getImageListByProductId(productId);
+            for (Image image : imageList) {
+                ImageDao.deleteImage(image);
             }
             ProductDao.deleteProduct(product);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
