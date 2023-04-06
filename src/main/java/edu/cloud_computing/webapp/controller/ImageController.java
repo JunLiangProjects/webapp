@@ -25,8 +25,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -37,12 +35,12 @@ public class ImageController {
     @Value("${bucketName}")
     private String bucketName;// = "terraform-20230401214827217000000002";
 
+    @Autowired
+    private ResourceLoader resourceLoader;
+
     @GetMapping("/health")
     public ResponseEntity<?> AnotherHealthEndpoint() {
         try {
-//            File file=new File();
-//            String fileName = "D:\\data\\test\\newFile3.txt";
-
             // 转换成List<String>, 要注意java.lang.OutOfMemoryError: Java heap space
 //            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
 ////            lines.forEach(System.out::println);
@@ -56,17 +54,11 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-    //    @Autowired
-//    S3Client s3client;
 
     private static final Region region = Region.US_EAST_1;
     private static final AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAQJ4SCHKIRFDX3CVD", "0Y3JLytg7BXvsv4x5hK4ZlfyMJtpQu9G7lkoNYFY");//改成IAM role验证方式
     private static final S3Client s3Client = S3Client.builder().region(region).credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
     //    private static S3Client s3Client = S3Client.builder().region(region).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
 
     @PostMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {

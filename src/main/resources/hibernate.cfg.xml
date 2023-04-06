@@ -7,9 +7,6 @@
     <session-factory>
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-<!--        <property name="connection.url">jdbc:mysql://localhost:3306/cloud_computing</property>-->
-<!--        <property name="connection.username">Jun_Liang</property>-->
-<!--        <property name="connection.password">Me_262A1a</property>-->
         <property name="connection.url">jdbc:mysql://${db_endpoint}/${db_name}</property>
         <property name="connection.username">${db_username}</property>
         <property name="connection.password">${db_password}</property>
