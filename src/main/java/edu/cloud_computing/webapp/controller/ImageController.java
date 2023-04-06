@@ -45,7 +45,6 @@ public class ImageController {
 
             // 转换成List<String>, 要注意java.lang.OutOfMemoryError: Java heap space
 //            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
-////            List<String> lines = Files.readAllLines(Paths.get("D:\\Prototypes\\Java\\Cloud_Computing\\webapp\\src\\main\\resources\\ReadingTest.txt"));
 ////            lines.forEach(System.out::println);
 //            StringBuilder stringBuilder = new StringBuilder();
 //            for (String str : lines) {
