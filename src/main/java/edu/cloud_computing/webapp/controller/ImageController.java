@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -33,7 +34,7 @@ import java.util.UUID;
 @RestController
 public class ImageController {
     @Value("${bucketName}")
-    private String bucketName;// = "terraform-20230401214827217000000002";
+    private String bucketName;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -55,10 +56,9 @@ public class ImageController {
         }
     }
 
-    private static final Region region = Region.US_EAST_1;
-    private static final AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAQJ4SCHKIRFDX3CVD", "0Y3JLytg7BXvsv4x5hK4ZlfyMJtpQu9G7lkoNYFY");//改成IAM role验证方式
-    private static final S3Client s3Client = S3Client.builder().region(region).credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
-    //    private static S3Client s3Client = S3Client.builder().region(region).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
+//    private static final AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAQJ4SCHKIRFDX3CVD", "0Y3JLytg7BXvsv4x5hK4ZlfyMJtpQu9G7lkoNYFY");//改成IAM role验证方式
+//    private static final S3Client s3Client = S3Client.builder().region(region).credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
+    private static final S3Client s3Client = S3Client.builder().region(Region.US_EAST_1).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
 
     @PostMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
@@ -119,7 +119,7 @@ public class ImageController {
             jsonString.append(objectWriter.writeValueAsString(image));
             jsonString.append('\n');
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(jsonString.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(jsonString.toString());
     }
 
     @GetMapping("/v1/product/{productId}/image/{imageId}")
@@ -140,7 +140,7 @@ public class ImageController {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
         ObjectWriter objectWriter = new ObjectMapper().setDateFormat(dateFormat).writer().withDefaultPrettyPrinter();
         String jsonString = objectWriter.writeValueAsString(image);
-        return ResponseEntity.status(HttpStatus.CREATED).body(jsonString);
+        return ResponseEntity.status(HttpStatus.OK).body(jsonString);
     }
 
     @DeleteMapping("/v1/product/{productId}/image/{imageId}")
