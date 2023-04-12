@@ -3,6 +3,8 @@ package edu.cloud_computing.webapp.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.timgroup.statsd.NonBlockingStatsDClient;
+import com.timgroup.statsd.StatsDClient;
 import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.User;
 import org.json.JSONObject;
@@ -24,28 +26,32 @@ import java.util.Iterator;
 @RestController
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
     @PostMapping("/v1/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {
+        statsDClient.incrementCounter("UserController.PostMapping.createUser");
         logger.info("User requests to create a user.");
         if (hasIllegalField(requestBody)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
+            logger.warn("Only user name, password, first name and last name allowed during input.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only user name, password, first name and last name allowed during input.'}");
         }
         User user = new ObjectMapper().readValue(requestBody, User.class);
         String username = user.getUsername();
         if (user.getUsername() == null || user.getPassword() == null || user.getFirstName() == null || user.getLastName() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide user name, password, first name and last name to register!'}");
+            logger.warn("Your must provide user name, password, first name and last name to register.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide user name, password, first name and last name to register.'}");
         }
         if (!username.matches("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your username has to be valid email address!'}");
+            logger.warn("Your username has to be valid email address.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your username has to be valid email address.'}");
         } else if (UserDao.checkUsernameExists(username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This username already occupied!'}");
+            logger.warn("This username already occupied.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This username already occupied.'}");
         }
-
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         UserDao.createUser(user);
         user = UserDao.getUserByUsername(username);
-
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         ObjectWriter objectWriter = new ObjectMapper().setDateFormat(dateFormat).writer().withDefaultPrettyPrinter();
         String jsonString = objectWriter.writeValueAsString(user);
@@ -55,11 +61,14 @@ public class UserController {
     @GetMapping("/v1/user/{userId}")
     public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) {
         try {
+            statsDClient.incrementCounter("UserController.GetMapping.getUser");
             logger.info("User requests information of  a user.");
             if (!isAuthorized(requestHeader)) {
+                logger.warn("You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
             if (isForbidden(requestHeader, userId)) {
+                logger.warn("Restricted area! Access denied!");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User user = UserDao.getUserById(userId);
@@ -75,24 +84,30 @@ public class UserController {
     @PutMapping("/v1/user/{userId}")
     public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) {
         try {
+            statsDClient.incrementCounter("UserController.PutMapping.updateUser");
             logger.info("User requests to update a user.");
             if (hasIllegalField(body)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name are allowed during input'}");
+                logger.warn("Only user name, password, first name and last name are allowed during input.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only user name, password, first name and last name are allowed during input.'}");
             }
             if (!isAuthorized(requestHeader)) {
+                logger.warn("You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
             if (isForbidden(requestHeader, userId)) {
+                logger.warn("Restricted area! Access denied!");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             User oldUser = UserDao.getUserById(userId);
             User user = new ObjectMapper().readValue(body, User.class);
             if (!oldUser.getUsername().equals(user.getUsername())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'you can not change your username'}");
+                logger.warn("You can not change your username.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'You can not change your username.'}");
             }
             if (user.getPassword() != null) {
                 if (user.getPassword().equals("")) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Password can not be empty!'}");
+                    logger.warn("Password can not be empty.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Password can not be empty.'}");
                 } else {
                     oldUser.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
                 }

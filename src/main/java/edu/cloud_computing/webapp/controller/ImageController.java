@@ -3,6 +3,8 @@ package edu.cloud_computing.webapp.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.timgroup.statsd.NonBlockingStatsDClient;
+import com.timgroup.statsd.StatsDClient;
 import edu.cloud_computing.webapp.dao.ImageDao;
 import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
@@ -41,9 +43,11 @@ public class ImageController {
 
     private static final S3Client s3Client = S3Client.builder().region(Region.US_EAST_1).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
     private final Logger logger = LoggerFactory.getLogger(ImageController.class);
+    private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
     @PostMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
+        statsDClient.incrementCounter("ImageController.PostMapping.createImage");
         logger.info("User requests to upload an image.");
         if (!UserController.isAuthorized(requestHeader)) {
             logger.warn("You are not authorized.");
@@ -90,6 +94,7 @@ public class ImageController {
 
     @GetMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> getImageList(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) throws JsonProcessingException {
+        statsDClient.incrementCounter("ImageController.GetMapping.getImageList");
         logger.info("User requests information of a list of images.");
         if (!UserController.isAuthorized(requestHeader)) {
             logger.warn("You are not authorized.");
@@ -116,6 +121,7 @@ public class ImageController {
 
     @GetMapping("/v1/product/{productId}/image/{imageId}")
     public ResponseEntity<?> getImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) throws JsonProcessingException {
+        statsDClient.incrementCounter("ImageController.GetMapping.getImage");
         logger.info("User requests information of an image.");
         if (!UserController.isAuthorized(requestHeader)) {
             logger.warn("You are not authorized.");
@@ -142,6 +148,7 @@ public class ImageController {
 
     @DeleteMapping("/v1/product/{productId}/image/{imageId}")
     public ResponseEntity<?> deleteImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) {
+        statsDClient.incrementCounter("ImageController.DeleteMapping.deleteImage");
         logger.info("User requests to delete a specific image.");
         if (!UserController.isAuthorized(requestHeader)) {
             logger.warn("You are not authorized.");
