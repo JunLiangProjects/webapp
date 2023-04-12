@@ -3,6 +3,8 @@ package edu.cloud_computing.webapp.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.timgroup.statsd.NonBlockingStatsDClient;
+import com.timgroup.statsd.StatsDClient;
 import edu.cloud_computing.webapp.dao.ImageDao;
 import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
@@ -27,11 +29,14 @@ import java.util.List;
 @RestController
 public class ProductController {
     private final Logger logger = LoggerFactory.getLogger(ProductController.class);
+    private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
     @PostMapping("/v1/product")
     public ResponseEntity<?> createProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody) throws JsonProcessingException {
+        statsDClient.incrementCounter("ProductController.PostMapping.createProduct");
         logger.info("User requests to create a product.");
         if (!UserController.isAuthorized(requestHeader)) {
+            logger.warn("You are not authorized.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -47,17 +52,20 @@ public class ProductController {
         while (keys.hasNext()) {
             String key = keys.next();
             if (!hashSet.contains(key)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
+                logger.warn("Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.'}");
             }
             if (key.equals("quantity")) {
                 hasQuantity = true;
             }
         }
         if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity || product.getQuantity() < 0 || product.getQuantity() > 100) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create. '}");
+            logger.warn("Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to create.'}");
         }//What if quantity is not an int?
         if (ProductDao.checkSkuExists(product.getSku())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
+            logger.warn("This SKU for product is already occupied.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied.'}");
         }
         product.setOwnerUserId(UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId());
         ProductDao.createProduct(product);
@@ -71,8 +79,10 @@ public class ProductController {
     @GetMapping("/v1/product/{productId}")
     public ResponseEntity<?> getProduct(@PathVariable("productId") int productId) {
         try {
+            statsDClient.incrementCounter("ProductController.GetMapping.getProduct");
             logger.info("User requests information of a product.");
             if (!ProductDao.checkIdExists(productId)) {
+                logger.warn("No product with this id exists.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'No product with this id exists.'}");
             }
             Product product = ProductDao.getProductById(productId);
@@ -88,8 +98,10 @@ public class ProductController {
     @PutMapping("/v1/product/{productId}")
     public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
+            statsDClient.incrementCounter("ProductController.PutMapping.updateEntireProduct");
             logger.info("User requests to entirely update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
+                logger.warn("You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
             HashSet<String> hashSet = new HashSet<>();//Here's just a modified version of checking illegal field.
@@ -103,24 +115,29 @@ public class ProductController {
             while (keys.hasNext()) {
                 String key = keys.next();
                 if (!hashSet.contains(key)) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input. '}");
+                    logger.warn("Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.'}");
                 }
                 if (key.equals("quantity")) {
                     hasQuantity = true;
                 }
             }
             if (!ProductDao.checkIdExists(productId)) {
+                logger.warn("No product with this id exists.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'No product with this id exists.'}");
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
             if (product.getName() == null || product.getDescription() == null || product.getSku() == null || product.getManufacturer() == null || !hasQuantity || product.getQuantity() < 0 || product.getQuantity() > 100) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update. '}");
+                logger.warn("Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message:'Your must provide and only provide product name, description, SKU, manufacturer and an integer quantity between 0 and 100 to update.'}");
             }//What if quantity is not an int?
             Product oldProduct = ProductDao.getProductById(productId);
             if (!product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
+                logger.warn("This SKU for product is already occupied.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied.'}");
             }
             if (isForbidden(requestHeader, productId)) {
+                logger.warn("Restricted area! Access denied!");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             product.setProductId(productId);
@@ -136,8 +153,10 @@ public class ProductController {
     @PatchMapping("/v1/product/{productId}")
     public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
+            statsDClient.incrementCounter("ProductController.PatchMapping.updateProduct");
             logger.info("User requests to update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
+                logger.warn("You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
             HashSet<String> hashSet = new HashSet<>();//Here's just a modified version of checking illegal field.
@@ -151,7 +170,8 @@ public class ProductController {
             while (keys.hasNext()) {
                 String key = keys.next();
                 if (!hashSet.contains(key)) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input'}");
+                    logger.warn("Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only product name, description, SKU, manufacturer and an integer quantity between 0 and 100 are allowed during input.'}");
                 }
                 if (key.equals("quantity")) {
                     changingQuantity = true;
@@ -159,13 +179,16 @@ public class ProductController {
             }
             Product product = new ObjectMapper().readValue(requestBody, Product.class);
             if (changingQuantity && (product.getQuantity() < 0 || product.getQuantity() > 100)) {//What if quantity is not an int?
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only an integer quantity between 0 and 100 are allowed during input'}");
+                logger.warn("Only an integer quantity between 0 and 100 are allowed during input.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only an integer quantity between 0 and 100 are allowed during input.'}");
             }
             Product oldProduct = ProductDao.getProductById(productId);
             if (product.getSku() != null && !product.getSku().equals(oldProduct.getSku()) && ProductDao.checkSkuExists(product.getSku())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied. '}");
+                logger.warn("This SKU for product is already occupied.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'This SKU for product is already occupied.'}");
             }
             if (isForbidden(requestHeader, productId)) {
+                logger.warn("Restricted area! Access denied!");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             if (product.getName() != null) {
@@ -193,19 +216,24 @@ public class ProductController {
     @DeleteMapping("/v1/product/{productId}")
     public ResponseEntity<?> deleteProduct(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) {
         try {
+            statsDClient.incrementCounter("ProductController.DeleteMapping.deleteProduct");
             logger.info("User requests to delete a product.");
             if (!UserController.isAuthorized(requestHeader)) {
+                logger.warn("You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
             if (productId <= 0) {
+                logger.warn("Product id must be a positive integer.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Product id must be a positive integer.'}");
             }
             if (!ProductDao.checkIdExists(productId)) {
+                logger.warn("Product with this id does not exist.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'Product with this id does not exist.'}");
             }
             int userId = UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId();
             Product product = ProductDao.getProductById(productId);
             if (userId != product.getOwnerUserId()) {
+                logger.warn("Restricted area! Access denied!");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
             }
             List<Image> imageList = ImageDao.getImageListByProductId(productId);
