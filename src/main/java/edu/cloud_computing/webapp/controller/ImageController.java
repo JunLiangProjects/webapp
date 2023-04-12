@@ -7,6 +7,8 @@ import edu.cloud_computing.webapp.dao.ImageDao;
 import edu.cloud_computing.webapp.dao.ProductDao;
 import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -15,9 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -39,43 +39,31 @@ public class ImageController {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    @GetMapping("/health")
-    public ResponseEntity<?> AnotherHealthEndpoint() {
-        try {
-            // 转换成List<String>, 要注意java.lang.OutOfMemoryError: Java heap space
-//            List<String> lines = Files.readAllLines(Paths.get("/tmp/webapp/user_data"));
-////            lines.forEach(System.out::println);
-//            StringBuilder stringBuilder = new StringBuilder();
-//            for (String str : lines) {
-//                stringBuilder.append(str);
-//            }
-//            bucketName = stringBuilder.toString();
-            return ResponseEntity.status(HttpStatus.OK).body(bucketName);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-//    private static final AwsBasicCredentials awsCreds = AwsBasicCredentials.create("AKIAQJ4SCHKIRFDX3CVD", "0Y3JLytg7BXvsv4x5hK4ZlfyMJtpQu9G7lkoNYFY");//改成IAM role验证方式
-//    private static final S3Client s3Client = S3Client.builder().region(region).credentialsProvider(StaticCredentialsProvider.create(awsCreds)).build();
     private static final S3Client s3Client = S3Client.builder().region(Region.US_EAST_1).credentialsProvider(InstanceProfileCredentialsProvider.builder().build()).build();
+    private final Logger logger = LoggerFactory.getLogger(ImageController.class);
 
     @PostMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
+        logger.info("User requests to upload an image.");
         if (!UserController.isAuthorized(requestHeader)) {
+            logger.warn("You are not authorized.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+            logger.warn("Invalid file name.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Invalid file name.'}");
         }
         if (!ProductDao.checkIdExists(productId)) {
+            logger.warn("No product with this id exists.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No product with this id exists.'}");
         }
         if (ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId()) {
+            logger.warn("Restricted area! Access denied!");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
         }
         String suffix = file.getOriginalFilename().trim().substring(file.getOriginalFilename().lastIndexOf("."));
         if (!suffix.equals(".jpg") && !suffix.equals(".jpeg") && !suffix.equals(".png")) {
+            logger.warn("Only jpg, jpeg and png allowed.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'Only jpg, jpeg and png allowed.'}");
         }
         String uuidFileName = UUID.randomUUID() + suffix;
@@ -102,13 +90,17 @@ public class ImageController {
 
     @GetMapping("/v1/product/{productId}/image")
     public ResponseEntity<?> getImageList(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) throws JsonProcessingException {
+        logger.info("User requests information of a list of images.");
         if (!UserController.isAuthorized(requestHeader)) {
+            logger.warn("You are not authorized.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
         if (!ProductDao.checkIdExists(productId)) {
+            logger.warn("No product with this id exists.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No product with this id exists.'}");
         }
         if (ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId()) {
+            logger.warn("Restricted area! Access denied!");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
         }
         List<Image> imageList = ImageDao.getImageListByProductId(productId);
@@ -124,16 +116,21 @@ public class ImageController {
 
     @GetMapping("/v1/product/{productId}/image/{imageId}")
     public ResponseEntity<?> getImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) throws JsonProcessingException {
+        logger.info("User requests information of an image.");
         if (!UserController.isAuthorized(requestHeader)) {
+            logger.warn("You are not authorized.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
         if (!ProductDao.checkIdExists(productId)) {
+            logger.warn("No product with this id exists.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No product with this id exists.'}");
         }
         if (ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId()) {
+            logger.warn("Restricted area! Access denied!");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
         }
         if (!ImageDao.checkImageIdExistsUnderProductId(imageId, productId)) {
+            logger.warn("No image with this id exists for the product you selected.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No image with this id exists for the product you selected.'}");
         }
         Image image = ImageDao.getImageByImageId(imageId);
@@ -145,16 +142,21 @@ public class ImageController {
 
     @DeleteMapping("/v1/product/{productId}/image/{imageId}")
     public ResponseEntity<?> deleteImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) {
+        logger.info("User requests to delete a specific image.");
         if (!UserController.isAuthorized(requestHeader)) {
+            logger.warn("You are not authorized.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
         if (!ProductDao.checkIdExists(productId)) {
+            logger.warn("No product with this id exists.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No product with this id exists.'}");
         }
         if (ProductDao.getProductById(productId).getOwnerUserId() != UserDao.getUserByUsername(UserController.tokenDecode(requestHeader.getFirst("Authorization"))[0]).getUserId()) {
+            logger.warn("Restricted area! Access denied!");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{error message: 'Restricted area! Access denied!'}");
         }
         if (!ImageDao.checkImageIdExistsUnderProductId(imageId, productId)) {
+            logger.warn("No image with this id exists for the product you selected.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'No image with this id exists for the product you selected.'}");
         }
         Image image = ImageDao.getImageByImageId(imageId);
@@ -166,5 +168,3 @@ public class ImageController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 }
-
-//原因是这个地方的log_stream_name只能是cloudwatch_log_stream

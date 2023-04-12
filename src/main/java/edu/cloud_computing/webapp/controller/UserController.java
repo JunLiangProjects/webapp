@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.User;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +23,11 @@ import java.util.Iterator;
 
 @RestController
 public class UserController {
+    private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/v1/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {
+        logger.info("User requests to create a user.");
         if (hasIllegalField(requestBody)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name allowed during input'}");
         }
@@ -51,6 +55,7 @@ public class UserController {
     @GetMapping("/v1/user/{userId}")
     public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) {
         try {
+            logger.info("User requests information of  a user.");
             if (!isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
@@ -70,6 +75,7 @@ public class UserController {
     @PutMapping("/v1/user/{userId}")
     public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) {
         try {
+            logger.info("User requests to update a user.");
             if (hasIllegalField(body)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{error message: 'only user name, password, first name and last name are allowed during input'}");
             }

@@ -52,6 +52,10 @@ build {
   }
   provisioner "file" {
     source      = "target/webapp-0.0.1-SNAPSHOT.jar"
-    destination = "/home/ec2-user/webapp-0.0.1-SNAPSHOT.jar"
+    destination = "/home/ec2-user/webapp/webapp-0.0.1-SNAPSHOT.jar"
+  }
+  provisioner "file" {
+    source      = "packer/cloudWatchConfig.json"
+    destination = "/home/ec2-user/webapp/cloudWatchConfig.json"
   }
 }
