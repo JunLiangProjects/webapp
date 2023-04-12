@@ -9,13 +9,15 @@ import edu.cloud_computing.webapp.dao.UserDao;
 import edu.cloud_computing.webapp.entity.Image;
 import edu.cloud_computing.webapp.entity.Product;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactoryLoader;
+//import javax.xml.validation.Schema;
+//import javax.xml.validation.SchemaFactoryLoader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -24,8 +26,11 @@ import java.util.List;
 
 @RestController
 public class ProductController {
+    private final Logger logger = LoggerFactory.getLogger(ProductController.class);
+
     @PostMapping("/v1/product")
     public ResponseEntity<?> createProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody) throws JsonProcessingException {
+        logger.info("User requests to create a product.");
         if (!UserController.isAuthorized(requestHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
         }
@@ -66,6 +71,7 @@ public class ProductController {
     @GetMapping("/v1/product/{productId}")
     public ResponseEntity<?> getProduct(@PathVariable("productId") int productId) {
         try {
+            logger.info("User requests information of a product.");
             if (!ProductDao.checkIdExists(productId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{error message: 'No product with this id exists.'}");
             }
@@ -82,6 +88,7 @@ public class ProductController {
     @PutMapping("/v1/product/{productId}")
     public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
+            logger.info("User requests to entirely update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
@@ -129,6 +136,7 @@ public class ProductController {
     @PatchMapping("/v1/product/{productId}")
     public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
         try {
+            logger.info("User requests to update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
@@ -185,6 +193,7 @@ public class ProductController {
     @DeleteMapping("/v1/product/{productId}")
     public ResponseEntity<?> deleteProduct(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) {
         try {
+            logger.info("User requests to delete a product.");
             if (!UserController.isAuthorized(requestHeader)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{error message: 'You are not authorized.'}");
             }
