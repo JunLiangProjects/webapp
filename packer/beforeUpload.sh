@@ -7,7 +7,7 @@ touch /home/ec2-user/webapp/application.properties
   echo "publish.metrics=true"
   echo "metrics.server.hostname=localhost"
   echo "metrics.server.port=8215"
-  echo "logging.file=/home/ec2-user/webapp/log/webapp.log"
+  echo "logging.file.name=/home/ec2-user/webapp/log/webapp.log"
 } >>/home/ec2-user/webapp/application.properties
 mkdir /home/ec2-user/webapp/log
 touch /home/ec2-user/webapp/log/amazon-cloudwatch-agent.log
