@@ -6,7 +6,7 @@ touch /home/ec2-user/webapp/application.properties
 {
   echo "publish.metrics=true"
   echo "metrics.server.hostname=localhost"
-  echo "metrics.server.port=8215"
+  echo "metrics.server.port=8125"
   echo "logging.file.name=/home/ec2-user/webapp/log/webapp.log"
 } >>/home/ec2-user/webapp/application.properties
 mkdir /home/ec2-user/webapp/log
