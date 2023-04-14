@@ -24,6 +24,7 @@ public class UserDao {
         session.persist(user);
         tx.commit();
         session.close();
+        sf.close();
     }
 
     public static User getUserById(int userId) {
@@ -36,6 +37,7 @@ public class UserDao {
         List<User> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -49,6 +51,7 @@ public class UserDao {
         List<User> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -62,6 +65,7 @@ public class UserDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -75,6 +79,7 @@ public class UserDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -87,6 +92,7 @@ public class UserDao {
         session.merge(user);
         tx.commit();
         session.close();
+        sf.close();
     }
 
     public static void main(String[] args) {

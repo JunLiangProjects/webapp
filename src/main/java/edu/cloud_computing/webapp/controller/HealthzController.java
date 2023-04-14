@@ -16,12 +16,8 @@ public class HealthzController {
 
     @GetMapping("/healthz")
     public ResponseEntity<?> HealthEndpoint() {
-        try {
             statsDClient.incrementCounter("HealthzController.GetMapping.HealthEndpoint");
             logger.info("User requests to check \"healthz\" condition of the server.");
             return ResponseEntity.status(HttpStatus.OK).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 }

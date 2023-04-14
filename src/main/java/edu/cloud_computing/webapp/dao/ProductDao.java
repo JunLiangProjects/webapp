@@ -22,6 +22,7 @@ public class ProductDao {
         session.persist(product);
         tx.commit();
         session.close();
+        sf.close();
     }
 
     public static Product getProductById(int productId) {
@@ -33,6 +34,7 @@ public class ProductDao {
         List<Product> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -45,6 +47,7 @@ public class ProductDao {
         List<Product> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -57,6 +60,7 @@ public class ProductDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -69,6 +73,7 @@ public class ProductDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -80,6 +85,7 @@ public class ProductDao {
         session.merge(product);
         tx.commit();
         session.close();
+        sf.close();
     }
 
     public static void deleteProduct(Product product) {
@@ -89,14 +95,6 @@ public class ProductDao {
         session.remove(product);
         tx.commit();
         session.close();
+        sf.close();
     }
-
-//    public static void main(String[] args) {
-//        Product product = new Product();
-//        product.setFirstName("Jun");
-//        product.setLastName("Liang");
-//        product.setProductname("liang.jun1@northeastern.edu");
-//        product.setPassword("123456");
-//        createProduct(product);
-//    }
 }

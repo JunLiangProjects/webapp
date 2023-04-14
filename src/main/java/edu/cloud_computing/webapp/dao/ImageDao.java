@@ -20,6 +20,7 @@ public class ImageDao {
         session.persist(image);
         tx.commit();
         session.close();
+        sf.close();
     }
 
     public static List<Image> getImageListByProductId(int productId) {
@@ -31,6 +32,7 @@ public class ImageDao {
         List<Image> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list;
     }
 
@@ -43,6 +45,7 @@ public class ImageDao {
         List<Image> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -56,6 +59,7 @@ public class ImageDao {
         List<Image> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(list.size() - 1);
     }
 
@@ -68,6 +72,7 @@ public class ImageDao {
         List<Image> list = query.list();
         tx.commit();
         session.close();
+        sf.close();
         return list.get(0);
     }
 
@@ -80,6 +85,7 @@ public class ImageDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -92,6 +98,7 @@ public class ImageDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -105,6 +112,7 @@ public class ImageDao {
         int result = Long.valueOf((long) query.list().get(0)).intValue();
         tx.commit();
         session.close();
+        sf.close();
         return result != 0;
     }
 
@@ -115,5 +123,6 @@ public class ImageDao {
         session.remove(image);
         tx.commit();
         session.close();
+        sf.close();
     }
 }
