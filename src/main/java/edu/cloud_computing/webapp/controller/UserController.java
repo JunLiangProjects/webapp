@@ -59,8 +59,7 @@ public class UserController {
     }
 
     @GetMapping("/v1/user/{userId}")
-    public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) {
-        try {
+    public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) throws JsonProcessingException {
             statsDClient.incrementCounter("UserController.GetMapping.getUser");
             logger.info("User requests information of  a user.");
             if (!isAuthorized(requestHeader)) {
@@ -76,14 +75,10 @@ public class UserController {
             ObjectWriter ow = new ObjectMapper().setDateFormat(df).writer().withDefaultPrettyPrinter();
             String jsonStr = ow.writeValueAsString(user);
             return ResponseEntity.status(HttpStatus.OK).body(jsonStr);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     @PutMapping("/v1/user/{userId}")
-    public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) {
-        try {
+    public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) throws JsonProcessingException {
             statsDClient.incrementCounter("UserController.PutMapping.updateUser");
             logger.info("User requests to update a user.");
             if (hasIllegalField(body)) {
@@ -120,9 +115,6 @@ public class UserController {
             }
             UserDao.updateUser(oldUser);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     public static Boolean isAuthorized(HttpHeaders requestHeader) {

@@ -77,8 +77,7 @@ public class ProductController {
     }
 
     @GetMapping("/v1/product/{productId}")
-    public ResponseEntity<?> getProduct(@PathVariable("productId") int productId) {
-        try {
+    public ResponseEntity<?> getProduct(@PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.GetMapping.getProduct");
             logger.info("User requests information of a product.");
             if (!ProductDao.checkIdExists(productId)) {
@@ -90,14 +89,10 @@ public class ProductController {
             ObjectWriter ow = new ObjectMapper().setDateFormat(df).writer().withDefaultPrettyPrinter();
             String jsonStr = ow.writeValueAsString(product);
             return ResponseEntity.status(HttpStatus.OK).body(jsonStr);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     @PutMapping("/v1/product/{productId}")
-    public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
-        try {
+    public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.PutMapping.updateEntireProduct");
             logger.info("User requests to entirely update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
@@ -145,14 +140,10 @@ public class ProductController {
             product.setOwnerUserId(oldProduct.getOwnerUserId());
             ProductDao.updateProduct(product);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     @PatchMapping("/v1/product/{productId}")
-    public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) {
-        try {
+    public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.PatchMapping.updateProduct");
             logger.info("User requests to update a product.");
             if (!UserController.isAuthorized(requestHeader)) {
@@ -208,14 +199,10 @@ public class ProductController {
             }
             ProductDao.updateProduct(oldProduct);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     @DeleteMapping("/v1/product/{productId}")
     public ResponseEntity<?> deleteProduct(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) {
-        try {
             statsDClient.incrementCounter("ProductController.DeleteMapping.deleteProduct");
             logger.info("User requests to delete a product.");
             if (!UserController.isAuthorized(requestHeader)) {
@@ -242,9 +229,6 @@ public class ProductController {
             }
             ProductDao.deleteProduct(product);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     public Boolean isForbidden(HttpHeaders requestHeader, int productId) {
