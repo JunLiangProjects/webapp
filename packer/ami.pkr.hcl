@@ -58,4 +58,8 @@ build {
     source      = "packer/cloudWatchConfig.json"
     destination = "/home/ec2-user/webapp/cloudWatchConfig.json"
   }
+  provisioner "file" {
+    source      = "packer/cloudWatch.service"
+    destination = "/home/ec2-user/webapp/cloudWatch.service"
+  }
 }
