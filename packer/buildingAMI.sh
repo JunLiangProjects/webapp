@@ -12,3 +12,4 @@ touch /home/ec2-user/webapp/application.properties
 mkdir /home/ec2-user/webapp/log
 touch /home/ec2-user/webapp/log/amazon-cloudwatch-agent.log
 touch /home/ec2-user/webapp/log/webapp.log
+touch /home/ec2-user/webapp/systemd.service
