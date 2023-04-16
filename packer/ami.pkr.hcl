@@ -23,7 +23,6 @@ variable "shared_account_id" {
   default = "810882337805"
 }
 
-# Configure the builder
 source "amazon-ebs" "csye6225_ami" {
   profile         = "${var.profile}"
   region          = "${var.aws_region}"
@@ -44,7 +43,6 @@ source "amazon-ebs" "csye6225_ami" {
   ami_users = ["${var.shared_account_id}"]
 }
 
-# Build the AMI
 build {
   sources = ["source.amazon-ebs.csye6225_ami"]
   provisioner "shell" {
@@ -57,9 +55,5 @@ build {
   provisioner "file" {
     source      = "packer/cloudWatchConfig.json"
     destination = "/home/ec2-user/webapp/cloudWatchConfig.json"
-  }
-  provisioner "file" {
-    source      = "packer/cloudWatch.service"
-    destination = "/home/ec2-user/webapp/cloudWatch.service"
   }
 }
