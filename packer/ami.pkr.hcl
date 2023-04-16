@@ -24,7 +24,7 @@ variable "shared_account_id" {
 }
 
 # Configure the builder
-source "amazon-ebs" "my_ami" {
+source "amazon-ebs" "csye6225_ami" {
   profile         = "${var.profile}"
   region          = "${var.aws_region}"
   ami_regions     = ["us-east-1"]
@@ -46,9 +46,9 @@ source "amazon-ebs" "my_ami" {
 
 # Build the AMI
 build {
-  sources = ["source.amazon-ebs.my_ami"]
+  sources = ["source.amazon-ebs.csye6225_ami"]
   provisioner "shell" {
-    script = "packer/beforeUpload.sh"
+    script = "packer/buildingAMI.sh"
   }
   provisioner "file" {
     source      = "target/webapp-0.0.1-SNAPSHOT.jar"
@@ -57,5 +57,9 @@ build {
   provisioner "file" {
     source      = "packer/cloudWatchConfig.json"
     destination = "/home/ec2-user/webapp/cloudWatchConfig.json"
+  }
+  provisioner "file" {
+    source      = "packer/cloudWatch.service"
+    destination = "/home/ec2-user/webapp/cloudWatch.service"
   }
 }

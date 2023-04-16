@@ -1,0 +1,9 @@
+[Unit]
+Description=Packer custom AMI builder for cloudWatch
+
+[Service]
+User=ec2-user
+ExecStart=/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/home/ec2-user/webapp/cloudWatchConfig.json -s
+
+[Install]
+WantedBy=multi-user.target
