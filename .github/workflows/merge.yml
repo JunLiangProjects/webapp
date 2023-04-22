@@ -58,9 +58,10 @@ jobs:
         run: |
           echo "{\"ImageId\": \"$(jq -r '.builds[0].artifact_id|split(":")[1]' ./manifest.json)\"}" >> launch-template-data.json
 
-      - name: Create launch template version # this "webapp-lt" is the name of launch_template # not any more
+      - name: Create launch template version
         run: |
-          aws ec2 create-launch-template-version --launch-template-id lt-030d5bad5dabe54be --launch-template-data file://launch-template-data.json --source-version 1
+          lt_id=$(aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[0].LaunchTemplate.LaunchTemplateId' --output text)
+          aws ec2 create-launch-template-version --launch-template-id $lt_id --launch-template-data file://launch-template-data.json --source-version 1
 
       - name: Update autoscaling group launch template
         run: |
