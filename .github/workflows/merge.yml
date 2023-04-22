@@ -27,7 +27,7 @@ jobs:
 
       - name: Test Java Code and Build with Maven and Build a jar package
         run:
-          mvn -B package -f ./webapp/pom.xml
+          mvn -B package -f ./pom.xml
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v2

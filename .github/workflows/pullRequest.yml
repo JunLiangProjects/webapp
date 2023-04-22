@@ -43,7 +43,7 @@ jobs:
 
       - name: Unit test, Build with Maven and Build a jar package
         run:
-          mvn -B package -f ./webapp/pom.xml
+          mvn -B package -f ./pom.xml
 
       - name: Install Packer
         run: |
