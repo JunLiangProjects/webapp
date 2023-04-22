@@ -51,10 +51,10 @@ jobs:
           sudo apt-get install -y packer
 
       - name: Find Shell
-        run: find . -name '*.sh' -type f
+        run: find . -name '*.pkr.hcl' -type f
 
       - name: Init,fmt and validate Packer files
         run: |
-          packer init ./packer
-          packer fmt ./packer
-          packer validate ./packer
+          packer init packer
+          packer fmt packer
+          packer validate packer
