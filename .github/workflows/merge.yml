@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "{\"ImageId\": \"$(jq -r '.builds[0].artifact_id|split(":")[1]' ./manifest.json)\"}" >> launch-template-data.json
 
-      - name: Create launch template version # this "webapp-lt"is the name of launch_template
+      - name: Create launch template version # this "webapp-lt" is the name of launch_template
         run: |
           aws ec2 create-launch-template-version --launch-template-name webapp-lt --launch-template-data file://launch-template-data.json --source-version 1
 
