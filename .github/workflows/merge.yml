@@ -5,8 +5,8 @@ on:
     branches:
       - main
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
   AWS_REGION: us-east-1
 
 jobs:
@@ -35,13 +35,6 @@ jobs:
           name: webapp-0.0.1-SNAPSHOT
           path: ./target/webapp-0.0.1-SNAPSHOT.jar
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
       - name: Install Packer
         run: |
           sudo apt-get update
@@ -53,6 +46,13 @@ jobs:
           packer fmt ./packer
           packer validate ./packer
           packer build ./packer
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
+          aws-region: us-east-1
 
       - name: Get AMI id and Write into a json file
         run: |

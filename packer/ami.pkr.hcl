@@ -12,11 +12,11 @@ variable "ssh_username" {
 }
 variable "source_ami" {
   type    = string
-  default = "ami-02adea5ce11fe70e7"
+  default = "ami-0dfcb1ef8550277af"
 }
 variable "vpc_id" {
   type    = string
-  default = "vpc-03ddb06675a800989"
+  default = "vpc-03e10d3f04590bf02"
 }
 variable "shared_account_id" {
   type    = string
@@ -56,10 +56,4 @@ build {
     source      = "packer/cloudWatchConfig.json"
     destination = "/home/ec2-user/webapp/cloudWatchConfig.json"
   }
-  post-processors : [
-    {
-      "type" : "manifest"
-      output = "manifest.json"
-    }
-  ]
 }
