@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: webapp-0.0.1-SNAPSHOT
-          path: ./webapp/target/webapp-0.0.1-SNAPSHOT.jar
+          path: ./target/webapp-0.0.1-SNAPSHOT.jar
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
