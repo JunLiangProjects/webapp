@@ -31,7 +31,7 @@ public class ProductController {
     private final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
-    @PostMapping("/v1/product")
+    @PostMapping("/v2/product")
     public ResponseEntity<?> createProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody) throws JsonProcessingException {
         statsDClient.incrementCounter("ProductController.PostMapping.createProduct");
         logger.info("User requests to create a product.");
@@ -76,7 +76,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(jsonString);
     }
 
-    @GetMapping("/v1/product/{productId}")
+    @GetMapping("/v2/product/{productId}")
     public ResponseEntity<?> getProduct(@PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.GetMapping.getProduct");
             logger.info("User requests information of a product.");
@@ -91,7 +91,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body(jsonStr);
     }
 
-    @PutMapping("/v1/product/{productId}")
+    @PutMapping("/v2/product/{productId}")
     public ResponseEntity<?> updateEntireProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.PutMapping.updateEntireProduct");
             logger.info("User requests to entirely update a product.");
@@ -142,7 +142,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
-    @PatchMapping("/v1/product/{productId}")
+    @PatchMapping("/v2/product/{productId}")
     public ResponseEntity<?> updateProduct(@RequestHeader HttpHeaders requestHeader, @RequestBody String requestBody, @PathVariable("productId") int productId) throws JsonProcessingException {
             statsDClient.incrementCounter("ProductController.PatchMapping.updateProduct");
             logger.info("User requests to update a product.");
@@ -201,7 +201,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
-    @DeleteMapping("/v1/product/{productId}")
+    @DeleteMapping("/v2/product/{productId}")
     public ResponseEntity<?> deleteProduct(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) {
             statsDClient.incrementCounter("ProductController.DeleteMapping.deleteProduct");
             logger.info("User requests to delete a product.");

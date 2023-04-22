@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Build and Deploy
 
 on:
   pull_request:
@@ -12,7 +12,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,11 +22,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven and Build a jar package
-        run: mvn -B package --file pom.xml
+      - name: Install Maven
+        run: sudo apt-get install -y maven
 
-      #- name: debug
-       # run: sudo apt-get update && sudo apt-get install tree -y && pwd && ls -al && ls -al target && tree && exit 1
+      - name: Find Jar
+        run: find . -name '*.jar' -type f
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: webapp-0.0.1-SNAPSHOT
+          path: ./webapp/target/webapp-0.0.1-SNAPSHOT.jar
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -36,18 +41,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Unit test, Build with Maven and Build a jar package
+        run:
+          mvn -B package -f ./pom.xml
+
       - name: Install Packer
         run: |
           sudo apt-get update
           sudo apt-get install -y packer
 
       - name: Find Shell
-        id: find
-        run: find . -name '*.pkr.hcl' -type f
+        run: find . -name '*.sh' -type f
 
-      - name: Build AMI
+      - name: Init,fmt and validate Packer files
         run: |
-          packer init packer
-          packer fmt packer
-          packer validate packer
-          packer build packer
+          packer init ./packer
+          packer fmt ./packer
+          packer validate ./packer
