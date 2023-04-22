@@ -28,7 +28,7 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
-    @PostMapping("/v1/user")
+    @PostMapping("/v2/user")
     public ResponseEntity<?> createUser(@RequestBody String requestBody) throws JsonProcessingException {
         statsDClient.incrementCounter("UserController.PostMapping.createUser");
         logger.info("User requests to create a user.");
@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(jsonString);
     }
 
-    @GetMapping("/v1/user/{userId}")
+    @GetMapping("/v2/user/{userId}")
     public ResponseEntity<?> getUser(@RequestHeader HttpHeaders requestHeader, @PathVariable("userId") int userId) throws JsonProcessingException {
             statsDClient.incrementCounter("UserController.GetMapping.getUser");
             logger.info("User requests information of  a user.");
@@ -77,7 +77,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(jsonStr);
     }
 
-    @PutMapping("/v1/user/{userId}")
+    @PutMapping("/v2/user/{userId}")
     public ResponseEntity<?> updateUser(@RequestHeader HttpHeaders requestHeader, @RequestBody String body, @PathVariable("userId") int userId) throws JsonProcessingException {
             statsDClient.incrementCounter("UserController.PutMapping.updateUser");
             logger.info("User requests to update a user.");

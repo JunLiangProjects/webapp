@@ -45,7 +45,7 @@ public class ImageController {
     private final Logger logger = LoggerFactory.getLogger(ImageController.class);
     private final StatsDClient statsDClient = new NonBlockingStatsDClient("csye6225", "localhost", 8125);
 
-    @PostMapping("/v1/product/{productId}/image")
+    @PostMapping("/v2/product/{productId}/image")
     public ResponseEntity<?> createImage(@RequestHeader HttpHeaders requestHeader, @RequestParam("image") MultipartFile file, @PathVariable("productId") int productId) throws IOException {
         statsDClient.incrementCounter("ImageController.PostMapping.createImage");
         logger.info("User requests to upload an image.");
@@ -92,7 +92,7 @@ public class ImageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(jsonString);
     }
 
-    @GetMapping("/v1/product/{productId}/image")
+    @GetMapping("/v2/product/{productId}/image")
     public ResponseEntity<?> getImageList(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId) throws JsonProcessingException {
         statsDClient.incrementCounter("ImageController.GetMapping.getImageList");
         logger.info("User requests information of a list of images.");
@@ -119,7 +119,7 @@ public class ImageController {
         return ResponseEntity.status(HttpStatus.OK).body(jsonString.toString());
     }
 
-    @GetMapping("/v1/product/{productId}/image/{imageId}")
+    @GetMapping("/v2/product/{productId}/image/{imageId}")
     public ResponseEntity<?> getImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) throws JsonProcessingException {
         statsDClient.incrementCounter("ImageController.GetMapping.getImage");
         logger.info("User requests information of an image.");
@@ -146,7 +146,7 @@ public class ImageController {
         return ResponseEntity.status(HttpStatus.OK).body(jsonString);
     }
 
-    @DeleteMapping("/v1/product/{productId}/image/{imageId}")
+    @DeleteMapping("/v2/product/{productId}/image/{imageId}")
     public ResponseEntity<?> deleteImage(@RequestHeader HttpHeaders requestHeader, @PathVariable("productId") int productId, @PathVariable("imageId") int imageId) {
         statsDClient.incrementCounter("ImageController.DeleteMapping.deleteImage");
         logger.info("User requests to delete a specific image.");
